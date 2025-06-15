@@ -43,7 +43,7 @@
 
     function convertCityTimeToLocal(city, dateTimeStr) {
       const { DateTime } = luxon;
-      const tz = cityTimezones[city.trim()];
+      const tz = cityTimezones[city?.trim()];
       if (!tz || !dateTimeStr) return dateTimeStr || "N/A";
 
       const [day, month, yearTime] = dateTimeStr.trim().split('/');
@@ -64,11 +64,15 @@
       return dt.setZone(DateTime.local().zoneName).toLocaleString(DateTime.DATETIME_MED);
     }
 
+    const allowedFields = ["Name", "Nationality", "Learning", "Date Time", "Level"];
+
     const params = new URLSearchParams(window.location.search);
     const table = document.getElementById("details-table");
     const rowData = Object.fromEntries(params.entries());
 
     for (const [key, value] of Object.entries(rowData)) {
+      if (!allowedFields.includes(key)) continue;
+
       const tr = document.createElement("tr");
 
       const th = document.createElement("th");
