@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Row Details</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    h2 { margin-bottom: 20px; }
+    table { border-collapse: collapse; width: 100%; max-width: 700px; }
+    th, td { border: 1px solid #ccc; padding: 10px; text-align: left; }
+    th { background-color: #f9f9f9; width: 30%; }
+    td { background-color: #fff; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+</head>
+<body>
+  <h2>Row Details</h2>
+  <table id="details-table"></table>
+
+  <script>
+    const cityTimezones = {
+      "Abidjan": "Africa/Abidjan", "Accra": "Africa/Accra", "Adelaide": "Australia/Adelaide", "Algiers": "Africa/Algiers",
+      "Amsterdam": "Europe/Amsterdam", "Athens": "Europe/Athens", "Auckland": "Pacific/Auckland", "Baghdad": "Asia/Baghdad",
+      "Bangkok": "Asia/Bangkok", "Barcelona": "Europe/Madrid", "Beijing": "Asia/Shanghai", "Beirut": "Asia/Beirut",
+      "Belgrade": "Europe/Belgrade", "Berlin": "Europe/Berlin", "Bogota": "America/Bogota", "Brisbane": "Australia/Brisbane",
+      "Brussels": "Europe/Brussels", "Bucharest": "Europe/Bucharest", "Budapest": "Europe/Budapest",
+      "Buenos Aires": "America/Argentina/Buenos_Aires", "Cairo": "Africa/Cairo", "Cape Town": "Africa/Johannesburg",
+      "Caracas": "America/Caracas", "Casablanca": "Africa/Casablanca", "Chicago": "America/Chicago",
+      "Copenhagen": "Europe/Copenhagen", "Delhi": "Asia/Kolkata", "Dubai": "Asia/Dubai", "Dublin": "Europe/Dublin",
+      "Hanoi": "Asia/Bangkok", "Hong Kong": "Asia/Hong_Kong", "Istanbul": "Europe/Istanbul", "Jakarta": "Asia/Jakarta",
+      "Jerusalem": "Asia/Jerusalem", "Johannesburg": "Africa/Johannesburg", "Kiev": "Europe/Kyiv",
+      "Kuala Lumpur": "Asia/Kuala_Lumpur", "Lima": "America/Lima", "Lisbon": "Europe/Lisbon", "London": "Europe/London",
+      "Los Angeles": "America/Los_Angeles", "Madrid": "Europe/Madrid", "Manila": "Asia/Manila",
+      "Mexico City": "America/Mexico_City", "Moscow": "Europe/Moscow", "Mumbai": "Asia/Kolkata",
+      "New York": "America/New_York", "Oslo": "Europe/Oslo", "Paris": "Europe/Paris", "Perth": "Australia/Perth",
+      "Prague": "Europe/Prague", "Rio de Janeiro": "America/Sao_Paulo", "Rome": "Europe/Rome",
+      "San Francisco": "America/Los_Angeles", "Santiago": "America/Santiago", "Sao Paulo": "America/Sao_Paulo",
+      "Seoul": "Asia/Seoul", "Shanghai": "Asia/Shanghai", "Singapore": "Asia/Singapore", "Stockholm": "Europe/Stockholm",
+      "Sydney": "Australia/Sydney", "Taipei": "Asia/Taipei", "Tehran": "Asia/Tehran", "Tokyo": "Asia/Tokyo",
+      "Toronto": "America/Toronto", "Vancouver": "America/Vancouver", "Vienna": "Europe/Vienna", "Warsaw": "Europe/Warsaw",
+      "Washington": "America/New_York", "Zurich": "Europe/Zurich"
+    };
+
+    function convertCityTimeToLocal(city, dateTimeStr) {
+      const { DateTime } = luxon;
+      const tz = cityTimezones[city.trim()];
+      if (!tz || !dateTimeStr) return dateTimeStr || "N/A";
+
+      const [day, month, yearTime] = dateTimeStr.trim().split('/');
+      const [year, time] = yearTime.trim().split(' ');
+      const [hour, minute] = time.split(':');
+
+      const dt = DateTime.fromObject(
+        {
+          year: +year,
+          month: +month,
+          day: +day,
+          hour: +hour,
+          minute: +minute
+        },
+        { zone: tz }
+      );
+
+      return dt.setZone(DateTime.local().zoneName).toLocaleString(DateTime.DATETIME_MED);
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const table = document.getElementById("details-table");
+    const rowData = Object.fromEntries(params.entries());
+
+    for (const [key, value] of Object.entries(rowData)) {
+      const tr = document.createElement("tr");
+
+      const th = document.createElement("th");
+      th.textContent = key;
+
+      const td = document.createElement("td");
+
+      if (key === "Date Time" && rowData["City"]) {
+        td.textContent = convertCityTimeToLocal(rowData["City"], value);
+      } else {
+        td.textContent = decodeURIComponent(value);
+      }
+
+      tr.appendChild(th);
+      tr.appendChild(td);
+      table.appendChild(tr);
+    }
+  </script>
+</body>
+</html>
